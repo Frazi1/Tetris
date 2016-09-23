@@ -39,12 +39,17 @@ namespace Tetris
             //SetPlayer();
             game = new Game(ROWS, COLUMNS,LabelArray);
             game.Start();
-            
 
+            game.BlockMoved += Game_BlockMoved;
 
         }
 
-   
+        private void Game_BlockMoved()
+        {
+            game._Drawer.PaintTetris();
+        }
+
+
 
 
         //Setting Grid and Player
@@ -88,6 +93,7 @@ namespace Tetris
 
             if (e.Key == Key.Space)
                 game.ShootMissile();
+            game._Drawer.PaintTetris(); // - УБРАТЬ
         }
     }
 

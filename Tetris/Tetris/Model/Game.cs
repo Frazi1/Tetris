@@ -97,6 +97,7 @@ namespace Tetris
                     }
                 }
             }
+            BlockMoved(); //
         }
 
         private void MoveMissiles()
@@ -116,11 +117,13 @@ namespace Tetris
                 DestroyMissile(m);
                 return;
             }
+            BlockMoved();
         }
         public void ShootMissile()
         {
             Missile m = Player.ShootMissile();
             Missiles.Add(m);
+            BlockMoved();
         }
         public bool isMissileCollided(out Missile collidedMissile, out Part collidedPart)
         {
@@ -164,8 +167,22 @@ namespace Tetris
         }
 
         //delegates
+        public delegate void BlockMovedEventHandler();
+        public delegate void BlockDestroyingEventHandler();
+        public delegate void MissileMovedEventHandler();
+        public delegate void PlayerShootEventHandler();
+        public delegate void MissileDestroyedEventHandler();
+        public delegate bool MissileCollidedEventHandler(Missile m, Part p);
+
 
         //events
+        public event BlockMovedEventHandler BlockMoved;
+        public event BlockDestroyingEventHandler BlockDestroyed;
+        public event MissileMovedEventHandler MissileMoved;
+        public event MissileDestroyedEventHandler MissileDestroyed;
+        public event MissileMovedEventHandler MissileMoving;
+        public event PlayerShootEventHandler PlayerShoot;
+        public event MissileCollidedEventHandler MissileCollided;
 
     }
 
