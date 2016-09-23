@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace Tetris
 {
-    public class Game
+    class Game
     {
         const int ROWS = 18;
         const int COLUMNS = 10;
@@ -16,21 +15,17 @@ namespace Tetris
         public List<Block> Blocks { get; set; }
         public Player Player { get; set; }
         public List<Missile> Missiles { get; set; }
-
-
-        public Drawer _Drawer { get; set; }
+        public List<Player> Test { get; set; }
 
         private int counter = 0;
         private DispatcherTimer GameTimer;
 
 
-        public Game(int Rows, int Cols, Label[,] labels)
+        public Game(int Rows, int Cols)
         {
             TetrisGrid = new List<Block>();
             Missiles = new List<Missile>();
             Blocks = new List<Block>();
-
-            _Drawer = new Drawer(this, labels);
 
             Player = new Player(Rows + 1);
             GameTimer = new DispatcherTimer();
@@ -53,16 +48,23 @@ namespace Tetris
         }
         public void DestroyBlock(Block b)
         {
+            BlockDestroying(b);
             TetrisGrid.Remove(b);
+            Blocks.Remove(b);
+            //BlockRemoved();
         }
         public void DestroyPart(ref Part p)
         {
+            BlockDestroying(p.parentBlock);
             p.parentBlock.Parts.Remove(p);
             p = null;
+            //BlockDestroyed();
         }
         public void DestroyMissile(Missile m)
         {
+            MissileDestroying();
             Missiles.Remove(m);
+            MissileDestroyed();
         }
         public bool isBlockDown(Block b)
         {
@@ -84,6 +86,7 @@ namespace Tetris
                 return;
             else
             {
+                BlockMoving();
                 for (int i = 0; i < Blocks.Count; i++)
                 {
                     if (isBlockDown(Blocks[i]))
@@ -94,6 +97,7 @@ namespace Tetris
                         Missile m;
                         Part p;
                         isMissileCollided(out m,out p);
+                        BlockMoved();
                     }
                 }
             }
@@ -102,6 +106,7 @@ namespace Tetris
 
         private void MoveMissiles()
         {
+            MissileMoving();
             for (int i = 0; i < Missiles.Count; i++)
             {
                 if (isMissileOut(Missiles[i]))
@@ -117,11 +122,13 @@ namespace Tetris
                 DestroyMissile(m);
                 return;
             }
+            MissileMoved();
         }
         public void ShootMissile()
         {
             Missile m = Player.ShootMissile();
             Missiles.Add(m);
+            PlayerShoot();
         }
         public bool isMissileCollided(out Missile collidedMissile, out Part collidedPart)
         {
@@ -141,6 +148,7 @@ namespace Tetris
                         {
                             collidedPart = currBlock.Parts[k];
                             collidedMissile = currMissile;
+                            MissileCollided(collidedMissile,collidedPart);
                             return true;
                         }
                     }
@@ -161,9 +169,33 @@ namespace Tetris
                 MoveDown();
                 counter = 0;
             }
-            _Drawer.PaintTetris();
         }
 
+        //delegates
+        public delegate void BlockMovedEventHandler();
+        public delegate void BlockMovingEventHandler();
+        public delegate void BlockDestyoingEventHandler(Block b);
+        public delegate void BlockDestroyingEventHandler();
+        public delegate void MissileMovedEventHandler();
+        public delegate void MissileMovingEventHandler();
+        public delegate void PlayerShootEventHandler();
+        public delegate void MissileDestroyingEventHandler();
+        public delegate void MissileDestroyedEventHandler();
+        public delegate bool MissileCollidedEventHandler(Missile m, Part p);
+        //public delegate void 
+
+
+        //events
+        public event BlockMovedEventHandler BlockMoved;
+        public event BlockMovingEventHandler BlockMoving;
+        public event BlockDestyoingEventHandler BlockDestroying;
+        public event BlockDestroyingEventHandler BlockDestroyed;
+        public event MissileMovedEventHandler MissileMoved;
+        public event MissileDestroyingEventHandler MissileDestroying;
+        public event MissileDestroyedEventHandler MissileDestroyed;
+        public event MissileMovedEventHandler MissileMoving;
+        public event PlayerShootEventHandler PlayerShoot;
+        public event MissileCollidedEventHandler MissileCollided;
     }
 
 
