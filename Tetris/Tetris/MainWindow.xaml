@@ -40,5 +40,6 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
+        <Label x:Name="Score" Content="&#xD;&#xA;" Grid.Column="9" HorizontalAlignment="Left" Height="39" Margin="34,-10,-114,0" Grid.RowSpan="2" VerticalAlignment="Top" Width="100" AutomationProperties.Name="Score"/>
     </Grid>
 </Window>

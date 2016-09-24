@@ -14,7 +14,7 @@ namespace Tetris
 
         public Block()
         {
-            PosX = 3;
+            PosX = 0;
             PosY = 0;
         }
 

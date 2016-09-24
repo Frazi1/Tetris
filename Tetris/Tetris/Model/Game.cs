@@ -12,13 +12,29 @@ namespace Tetris
         const int ROWS = 18;
         const int COLUMNS = 10;
 
-        public List<Block> TetrisGrid { get; set; }
         public List<Block> Blocks { get; set; }
         public Player Player { get; set; }
         public List<Missile> Missiles { get; set; }
+        public int Score
+        {
+            get
+            {
+                return score;
+            }
+
+            set
+            {
+                score = value;
+                ScoreUpdated();
+            }
+        }
+
+        private int score =0;
 
 
         public Drawer _Drawer { get; set; }
+
+
 
         private int counter = 0;
         private DispatcherTimer GameTimer;
@@ -26,9 +42,9 @@ namespace Tetris
 
         public Game(int Rows, int Cols, Label[,] labels)
         {
-            TetrisGrid = new List<Block>();
             Missiles = new List<Missile>();
             Blocks = new List<Block>();
+            //Score = 0;
 
             _Drawer = new Drawer(this, labels);
 
@@ -43,31 +59,69 @@ namespace Tetris
         {
             NewBlock();
             GameTimer.Start();
+            _Drawer.PaintTetris();
         }
 
         public void NewBlock()
         {
-            Block newBlock = new BlockL();
-            TetrisGrid.Add(newBlock);
+            Block newBlock = null;
+            Random rnd = new Random();
+            int type = rnd.Next(0, 5);
+            switch (type)
+            {
+                case 0:
+                    newBlock = new BlockI();
+                    break;
+                case 1:
+                    newBlock = new BlockL();
+                    break;
+                case 2:
+                    newBlock = new BlockO();
+                    break;
+                case 3:
+                    newBlock = new BlockS();
+                    break;
+                case 4:
+                    newBlock = new BlockT();
+                    break;
+            }
+            newBlock.PosX = rnd.Next(0, COLUMNS);
+            bool err = true;
+            while (err)
+            {
+                foreach(Part p in newBlock.Parts)
+                    while(p.PosX>=COLUMNS)
+                    {
+                        err = true;
+                        --newBlock.PosX;
+                        break;
+                    }
+                err = false;
+            }
+
             Blocks.Add(newBlock);
         }
         public void DestroyBlock(Block b)
         {
-            TetrisGrid.Remove(b);
+            Blocks.Remove(b);
+            BlockDestroyed();
         }
         public void DestroyPart(ref Part p)
         {
             p.parentBlock.Parts.Remove(p);
             p = null;
+            BlockDestroyed();
+            Score++;
         }
         public void DestroyMissile(Missile m)
         {
             Missiles.Remove(m);
+            BlockDestroyed();
         }
         public bool isBlockDown(Block b)
         {
             foreach (Part p in b.Parts)
-                if (p.PosY == ROWS - 2)
+                if (p.PosY == ROWS - 1)
                     return true;
             return false;
         }
@@ -80,20 +134,20 @@ namespace Tetris
 
         public void MoveDown()
         {
-            Missile m;
-            Part p;
             if (Blocks.Count == 0)
                 return;
             else
             {
                 for (int i = 0; i < Blocks.Count; i++)
                 {
+                    if (isBlockDown(Blocks[i]))
                         DestroyBlock(Blocks[i]);
                     else
                     {
+                        CheckCollision();
                         Blocks[i].MoveDown();
-
-                        isMissileCollided(out m,out p);
+                        CheckCollision();
+                        _Drawer.PaintTetris();
                     }
                 }
             }
@@ -102,21 +156,15 @@ namespace Tetris
 
         private void MoveMissiles()
         {
-            Missile m;
-            Part p;
-
+            CheckCollision();
             for (int i = 0; i < Missiles.Count; i++)
             {
+
                 if (isMissileOut(Missiles[i]))
                     DestroyMissile(Missiles[i]);
                 else
                 {
-                    if (isMissileCollided(out m, out p))
-                    {
-                        DestroyPart(ref p);
-                        DestroyMissile(m);
-                        return;
-                    }
+
                     Missiles[i].MoveUp();
                 }
             }
@@ -129,36 +177,36 @@ namespace Tetris
             Missiles.Add(m);
             BlockMoved();
         }
-        public bool isMissileCollided(out Missile collidedMissile, out Part collidedPart)
-        {
-            collidedPart = null;
-            collidedMissile = null;
 
+
+        public void CheckCollision()
+        {
             for (int i = 0; i < Missiles.Count; i++)
             {
-                Missile currMissile = Missiles[i];
-                for (int j = 0; j < TetrisGrid.Count; j++)
+                Missile m = Missiles[i];
+                for (int j = 0; j < Blocks.Count; j++)
                 {
-                    Block currBlock = TetrisGrid[j];
-                    for (int k = 0; k < currBlock.Parts.Count; k++)
+                    Block b = Blocks[j];
+                    for (int k = 0; k < b.Parts.Count; k++)
                     {
-                        if (currMissile.PosX == currBlock.Parts[k].PosX &&
-                            currMissile.PosY == currBlock.Parts[k].PosY)
+                        Part p = b.Parts[k];
+                        if (p.PosX == m.PosX && p.PosY == m.PosY)
                         {
-                            collidedPart = currBlock.Parts[k];
-                            collidedMissile = currMissile;
-                            return true;
+                            DestroyPart(ref p);
+                            DestroyMissile(m);
+                            _Drawer.PaintTetris();
                         }
                     }
                 }
-            }
 
-            return false;
+
+            }
         }
 
 
         private void TetrisTick(object sender, EventArgs e)
         {
+
             ++counter;
             if (Missiles.Count != 0)
                 MoveMissiles();
@@ -167,10 +215,9 @@ namespace Tetris
                 MoveDown();
                 counter = 0;
             }
-            _Drawer.PaintTetris();
         }
 
-        
+
 
         //delegates
         public delegate void BlockMovedEventHandler();
@@ -179,6 +226,7 @@ namespace Tetris
         public delegate void PlayerShootEventHandler();
         public delegate void MissileDestroyedEventHandler();
         public delegate bool MissileCollidedEventHandler(Missile m, Part p);
+        public delegate void ScoreUpdatedEventHandler();
 
 
         //events
@@ -189,6 +237,7 @@ namespace Tetris
         public event MissileMovedEventHandler MissileMoving;
         public event PlayerShootEventHandler PlayerShoot;
         public event MissileCollidedEventHandler MissileCollided;
+        public event ScoreUpdatedEventHandler ScoreUpdated;
 
     }
 
