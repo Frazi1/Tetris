@@ -80,19 +80,19 @@ namespace Tetris
 
         public void MoveDown()
         {
+            Missile m;
+            Part p;
             if (Blocks.Count == 0)
                 return;
             else
             {
                 for (int i = 0; i < Blocks.Count; i++)
                 {
-                    if (isBlockDown(Blocks[i]))
                         DestroyBlock(Blocks[i]);
                     else
                     {
                         Blocks[i].MoveDown();
-                        Missile m;
-                        Part p;
+
                         isMissileCollided(out m,out p);
                     }
                 }
@@ -102,21 +102,25 @@ namespace Tetris
 
         private void MoveMissiles()
         {
+            Missile m;
+            Part p;
+
             for (int i = 0; i < Missiles.Count; i++)
             {
                 if (isMissileOut(Missiles[i]))
                     DestroyMissile(Missiles[i]);
                 else
+                {
+                    if (isMissileCollided(out m, out p))
+                    {
+                        DestroyPart(ref p);
+                        DestroyMissile(m);
+                        return;
+                    }
                     Missiles[i].MoveUp();
+                }
             }
-            Missile m;
-            Part p;
-            if (isMissileCollided(out m, out p))
-            {
-                DestroyPart(ref p);
-                DestroyMissile(m);
-                return;
-            }
+
             BlockMoved();
         }
         public void ShootMissile()
@@ -165,6 +169,8 @@ namespace Tetris
             }
             _Drawer.PaintTetris();
         }
+
+        
 
         //delegates
         public delegate void BlockMovedEventHandler();
