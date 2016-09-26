@@ -37,12 +37,38 @@ namespace Tetris
             InitializeComponent();
             SetGrid();
             game = new Game(ROWS, COLUMNS,LabelArray);
-            game.Start();
+            
 
             game.BlockMoved += Game_BlockMoved;
             game.BlockDestroyed += Game_BlockDestroyed;
             game.ScoreUpdated += Game_ScoreUpdated;
+            game.MissileCollided += Game_MissileCollided;
+            game.Player.PlayerMoved += Player_PlayerMoved;
+            game.BlockSpawned += Game_BlockSpawned;
+            game.PlayerShoot += Game_PlayerShoot;
 
+            game.Start();
+        }
+
+        private void Game_PlayerShoot()
+        {
+            game._Drawer.PaintTetris();
+        }
+
+        private void Game_BlockSpawned()
+        {
+            game._Drawer.PaintTetris();
+        }
+
+        private void Player_PlayerMoved()
+        {
+            game._Drawer.PaintTetris();
+        }
+
+        private bool Game_MissileCollided()
+        {
+            game._Drawer.PaintTetris();
+            return true;
         }
 
         private void Game_ScoreUpdated()
@@ -98,7 +124,7 @@ namespace Tetris
                 game.ShootMissile();
             if (e.Key == Key.S)
                 game.NewBlock();
-            game._Drawer.PaintTetris(); // - УБРАТЬ
+            //game._Drawer.PaintTetris(); // - УБРАТЬ
         }
     }
 

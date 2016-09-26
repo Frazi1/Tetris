@@ -100,6 +100,7 @@ namespace Tetris
             }
 
             Blocks.Add(newBlock);
+            BlockSpawned();
         }
         public void DestroyBlock(Block b)
         {
@@ -175,7 +176,8 @@ namespace Tetris
         {
             Missile m = Player.ShootMissile();
             Missiles.Add(m);
-            BlockMoved();
+            //BlockMoved();
+            PlayerShoot();
         }
 
 
@@ -194,7 +196,8 @@ namespace Tetris
                         {
                             DestroyPart(ref p);
                             DestroyMissile(m);
-                            _Drawer.PaintTetris();
+                            //_Drawer.PaintTetris();
+                            MissileCollided();
                         }
                     }
                 }
@@ -225,8 +228,9 @@ namespace Tetris
         public delegate void MissileMovedEventHandler();
         public delegate void PlayerShootEventHandler();
         public delegate void MissileDestroyedEventHandler();
-        public delegate bool MissileCollidedEventHandler(Missile m, Part p);
+        public delegate bool MissileCollidedEventHandler();
         public delegate void ScoreUpdatedEventHandler();
+        public delegate void BlockSpawnedEventHandler();
 
 
         //events
@@ -238,6 +242,7 @@ namespace Tetris
         public event PlayerShootEventHandler PlayerShoot;
         public event MissileCollidedEventHandler MissileCollided;
         public event ScoreUpdatedEventHandler ScoreUpdated;
+        public event BlockSpawnedEventHandler BlockSpawned;
 
     }
 

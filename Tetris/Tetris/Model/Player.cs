@@ -24,6 +24,7 @@ namespace Tetris
             if (PosX > 0)
             {
                 --PosX;
+                PlayerMoved();
             }
         }
         public void MoveRight()
@@ -31,6 +32,7 @@ namespace Tetris
             if (PosX < 9)
             {
                 ++PosX;
+                PlayerMoved();
             }
         }
         public Missile ShootMissile()
@@ -39,7 +41,11 @@ namespace Tetris
             return Missile;
         }
 
+        //delegates
+        public delegate void PlayerMovedEventHandler();
 
+        //events
+        public event PlayerMovedEventHandler PlayerMoved;
 
     }
 }
