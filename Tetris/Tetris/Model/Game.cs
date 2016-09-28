@@ -9,12 +9,15 @@ namespace Tetris
 {
     public class Game
     {
-        const int ROWS = 18;
-        const int COLUMNS = 10;
+        const int TIMER_INTERVAL = 250;
+
+        int ROWS;
+        int COLUMNS;
 
         public List<Block> Blocks { get; set; }
         public Player Player { get; set; }
         public List<Missile> Missiles { get; set; }
+
         public int Score
         {
             get
@@ -28,13 +31,10 @@ namespace Tetris
                 ScoreUpdated();
             }
         }
+        private int score = 0;
 
-        private int score =0;
-
-
-        public Drawer _Drawer { get; set; }
-
-
+        public int Difficulty { get; set; }
+        private double blockSpawnCoef = 0.1;
 
         private int counter = 0;
         private DispatcherTimer GameTimer;
@@ -42,16 +42,20 @@ namespace Tetris
 
         public Game(int Rows, int Cols, Label[,] labels)
         {
+            ROWS = Rows;
+            COLUMNS = Cols;
+            Difficulty = 1;
+
             Missiles = new List<Missile>();
             Blocks = new List<Block>();
-            //Score = 0;
 
-            _Drawer = new Drawer(this, labels);
-
-            Player = new Player(Rows + 1);
+            Player = new Player(ROWS,COLUMNS);
             GameTimer = new DispatcherTimer();
-            GameTimer.Interval = TimeSpan.FromMilliseconds(250);
+            GameTimer.Interval = TimeSpan.FromMilliseconds(TIMER_INTERVAL);
             GameTimer.Tick += new EventHandler(TetrisTick);
+
+            //GameTimer = new Timer(TIMER_INTERVAL);
+            //GameTimer.Elapsed += new ElapsedEventHandler( TetrisTick);
 
         }
 
@@ -59,7 +63,8 @@ namespace Tetris
         {
             NewBlock();
             GameTimer.Start();
-            _Drawer.PaintTetris();
+            //_Drawer.PaintTetris();
+            BlockMoved();
         }
 
         public void NewBlock()
@@ -89,8 +94,8 @@ namespace Tetris
             bool err = true;
             while (err)
             {
-                foreach(Part p in newBlock.Parts)
-                    while(p.PosX>=COLUMNS)
+                foreach (Part p in newBlock.Parts)
+                    while (p.PosX >= COLUMNS)
                     {
                         err = true;
                         --newBlock.PosX;
@@ -101,6 +106,10 @@ namespace Tetris
 
             Blocks.Add(newBlock);
             BlockSpawned();
+        }
+        public void SpawnBlocks(int number)
+        {
+
         }
         public void DestroyBlock(Block b)
         {
@@ -119,11 +128,17 @@ namespace Tetris
             Missiles.Remove(m);
             BlockDestroyed();
         }
+
         public bool isBlockDown(Block b)
         {
             foreach (Part p in b.Parts)
                 if (p.PosY == ROWS - 1)
+                {
+                    GameOver();
+                    GameTimer.Stop();
+
                     return true;
+                }
             return false;
         }
         public bool isMissileOut(Missile m)
@@ -148,24 +163,21 @@ namespace Tetris
                         CheckCollision();
                         Blocks[i].MoveDown();
                         CheckCollision();
-                        _Drawer.PaintTetris();
+                        //_Drawer.PaintTetris();
                     }
                 }
             }
             BlockMoved(); //
         }
-
-        private void MoveMissiles()
+        public void MoveMissiles()
         {
             CheckCollision();
             for (int i = 0; i < Missiles.Count; i++)
             {
-
                 if (isMissileOut(Missiles[i]))
                     DestroyMissile(Missiles[i]);
                 else
                 {
-
                     Missiles[i].MoveUp();
                 }
             }
@@ -209,7 +221,7 @@ namespace Tetris
 
         private void TetrisTick(object sender, EventArgs e)
         {
-
+            //if(GameTimer.
             ++counter;
             if (Missiles.Count != 0)
                 MoveMissiles();
@@ -224,25 +236,23 @@ namespace Tetris
 
         //delegates
         public delegate void BlockMovedEventHandler();
-        public delegate void BlockDestroyingEventHandler();
+        public delegate void BlockDestroyedEventHandler();
         public delegate void MissileMovedEventHandler();
         public delegate void PlayerShootEventHandler();
-        public delegate void MissileDestroyedEventHandler();
         public delegate bool MissileCollidedEventHandler();
         public delegate void ScoreUpdatedEventHandler();
         public delegate void BlockSpawnedEventHandler();
+        public delegate void GameOverEventHandler();
 
 
         //events
         public event BlockMovedEventHandler BlockMoved;
-        public event BlockDestroyingEventHandler BlockDestroyed;
-        public event MissileMovedEventHandler MissileMoved;
-        public event MissileDestroyedEventHandler MissileDestroyed;
-        public event MissileMovedEventHandler MissileMoving;
+        public event BlockDestroyedEventHandler BlockDestroyed;
         public event PlayerShootEventHandler PlayerShoot;
         public event MissileCollidedEventHandler MissileCollided;
         public event ScoreUpdatedEventHandler ScoreUpdated;
         public event BlockSpawnedEventHandler BlockSpawned;
+        public event GameOverEventHandler GameOver;
 
     }
 

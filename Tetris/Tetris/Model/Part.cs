@@ -9,6 +9,7 @@ namespace Tetris
     {
         private int posX;
         private int posY;
+
         public Block parentBlock { get; set; }
 
         public int PosX

@@ -27,6 +27,8 @@ namespace Tetris
 
         //vars
         Game game;
+        Drawer drawer;
+
         Label[,] LabelArray = new Label[ROWS+1, COLUMNS];
         Label[] PlayerArr = new Label[COLUMNS];
         //Label[,] Missiles = new Label[ROWS, COLUMNS];
@@ -37,6 +39,7 @@ namespace Tetris
             InitializeComponent();
             SetGrid();
             game = new Game(ROWS, COLUMNS,LabelArray);
+            drawer = new Drawer(game, LabelArray);
             
 
             game.BlockMoved += Game_BlockMoved;
@@ -46,28 +49,36 @@ namespace Tetris
             game.Player.PlayerMoved += Player_PlayerMoved;
             game.BlockSpawned += Game_BlockSpawned;
             game.PlayerShoot += Game_PlayerShoot;
+            game.GameOver += Game_GameOver;
+    
 
             game.Start();
         }
 
         private void Game_PlayerShoot()
         {
-            game._Drawer.PaintTetris();
+            drawer.PaintTetris();
         }
+
+        private void Game_GameOver()
+        {
+            MessageBox.Show("GAME OVER \r\n YOUR SCORE: " + game.Score);
+        }
+
 
         private void Game_BlockSpawned()
         {
-            game._Drawer.PaintTetris();
+            drawer.PaintTetris();
         }
 
         private void Player_PlayerMoved()
         {
-            game._Drawer.PaintTetris();
+            drawer.PaintTetris();
         }
 
         private bool Game_MissileCollided()
         {
-            game._Drawer.PaintTetris();
+            drawer.PaintTetris();
             return true;
         }
 
@@ -78,12 +89,12 @@ namespace Tetris
 
         private void Game_BlockDestroyed()
         {
-            game._Drawer.PaintTetris();
+            drawer.PaintTetris();
         }
 
         private void Game_BlockMoved()
         {
-            game._Drawer.PaintTetris();
+            drawer.PaintTetris();
         }
 
 
@@ -124,7 +135,6 @@ namespace Tetris
                 game.ShootMissile();
             if (e.Key == Key.S)
                 game.NewBlock();
-            //game._Drawer.PaintTetris(); // - УБРАТЬ
         }
     }
 

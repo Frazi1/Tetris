@@ -6,17 +6,22 @@ using System.Windows.Media;
 
 namespace Tetris
 {
-    public class Player: Block
+    public class Player : Block
     {
-        public Color Color { get; set; }
-        public int MissileSpeed { get; set; }
+        private int Rows;
+        private int Cols;
 
-        public Player(int playerRow)
+        public Color Color { get; set; }
+
+        public Player(int rows, int cols)
         {
+            Rows = rows;
+            Cols = cols;
+
             PosX = 5;
-            PosY = playerRow;
+            PosY = rows + 1;
             Color = Colors.Blue;
-            Parts = new List<Part>() {new Part(this, 0, 0)};
+            Parts = new List<Part>() { new Part(this, 0, 0) };
         }
 
         public void MoveLeft()
@@ -29,7 +34,7 @@ namespace Tetris
         }
         public void MoveRight()
         {
-            if (PosX < 9)
+            if (PosX < Cols - 1)
             {
                 ++PosX;
                 PlayerMoved();
