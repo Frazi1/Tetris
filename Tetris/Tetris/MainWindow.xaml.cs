@@ -31,14 +31,13 @@ namespace Tetris
 
         Label[,] LabelArray = new Label[ROWS+1, COLUMNS];
         Label[] PlayerArr = new Label[COLUMNS];
-        //Label[,] Missiles = new Label[ROWS, COLUMNS];
 
 
         public MainWindow()
         {
             InitializeComponent();
             SetGrid();
-            game = new Game(ROWS, COLUMNS,LabelArray);
+            game = new Game(ROWS, COLUMNS);
             drawer = new Drawer(game, LabelArray);
             
 

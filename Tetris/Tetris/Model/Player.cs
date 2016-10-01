@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace Tetris
 {
-    public class Player : Block
+    public class Player: Block
     {
         private int Rows;
         private int Cols;
@@ -18,7 +18,7 @@ namespace Tetris
             Rows = rows;
             Cols = cols;
 
-            PosX = 5;
+            PosX = cols / 2;
             PosY = rows + 1;
             Color = Colors.Blue;
             Parts = new List<Part>() { new Part(this, 0, 0) };

@@ -9,10 +9,10 @@ namespace Tetris
 {
     public class Game
     {
-        const int TIMER_INTERVAL = 250;
+        const int TIMER_INTERVAL = 200;
 
-        int ROWS;
-        int COLUMNS;
+        private int ROWS;
+        private int COLUMNS;
 
         public List<Block> Blocks { get; set; }
         public Player Player { get; set; }
@@ -40,23 +40,19 @@ namespace Tetris
         private DispatcherTimer GameTimer;
 
 
-        public Game(int Rows, int Cols, Label[,] labels)
+        public Game(int Rows, int Cols)
         {
             ROWS = Rows;
             COLUMNS = Cols;
-            Difficulty = 1;
+            Difficulty = 3;
 
             Missiles = new List<Missile>();
             Blocks = new List<Block>();
 
-            Player = new Player(ROWS,COLUMNS);
+            Player = new Player(ROWS, COLUMNS);
             GameTimer = new DispatcherTimer();
             GameTimer.Interval = TimeSpan.FromMilliseconds(TIMER_INTERVAL);
             GameTimer.Tick += new EventHandler(TetrisTick);
-
-            //GameTimer = new Timer(TIMER_INTERVAL);
-            //GameTimer.Elapsed += new ElapsedEventHandler( TetrisTick);
-
         }
 
         public void Start()
@@ -64,7 +60,7 @@ namespace Tetris
             NewBlock();
             GameTimer.Start();
             //_Drawer.PaintTetris();
-            BlockMoved();
+            //BlockMoved();
         }
 
         public void NewBlock()
@@ -109,7 +105,19 @@ namespace Tetris
         }
         public void SpawnBlocks(int number)
         {
+            double coef = blockSpawnCoef;
+            Random rnd = new Random();
+            for (int i = 0; i < number; i++)
+            {
+                if (rnd.NextDouble() <= coef)
+                {
+                    NewBlock();
+                    coef /= 2;
+                }
+                else
+                    coef *= 2;
 
+            }
         }
         public void DestroyBlock(Block b)
         {
@@ -163,7 +171,6 @@ namespace Tetris
                         CheckCollision();
                         Blocks[i].MoveDown();
                         CheckCollision();
-                        //_Drawer.PaintTetris();
                     }
                 }
             }
@@ -188,7 +195,6 @@ namespace Tetris
         {
             Missile m = Player.ShootMissile();
             Missiles.Add(m);
-            //BlockMoved();
             PlayerShoot();
         }
 
@@ -208,7 +214,6 @@ namespace Tetris
                         {
                             DestroyPart(ref p);
                             DestroyMissile(m);
-                            //_Drawer.PaintTetris();
                             MissileCollided();
                         }
                     }
@@ -221,15 +226,16 @@ namespace Tetris
 
         private void TetrisTick(object sender, EventArgs e)
         {
-            //if(GameTimer.
             ++counter;
             if (Missiles.Count != 0)
                 MoveMissiles();
             if (counter == 3)
             {
                 MoveDown();
+                SpawnBlocks(Difficulty);
                 counter = 0;
             }
+
         }
 
 

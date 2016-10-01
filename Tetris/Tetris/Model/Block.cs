@@ -18,13 +18,6 @@ namespace Tetris
             PosY = 0;
         }
 
-
-        public int GetStartingCoords()
-        {
-            Random rnd = new Random();
-            return rnd.Next(0, 10);
-        }
-
         public void MoveDown()
         {
             foreach (Part p in Parts)
